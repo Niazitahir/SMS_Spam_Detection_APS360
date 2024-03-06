@@ -9,6 +9,21 @@ from torch.utils.data.sampler import SubsetRandomSampler
 import torchvision.transforms as transforms
 import pandas as pd
 import csv
+from sklearn.utils import shuffle
+
+
+'''NOTES:
+THIS SCRIPT RANDOMELY SPLITS THE DATASET INTO 70% TRAINING,
+15% Valid, 15% Test
+
+Change the values as needed to change training params
+
+It is then saved into the RawData Folder as a csv. Simply
+Import the csv using pandas from_csv() function to recreate
+the dataframes. 
+
+Have fun, boys. 
+'''
 
 totalData = []
 
@@ -34,4 +49,19 @@ totalData = list(zip(labels, values))
 
 print(totalData[:10])
 
+totalData = pd.DataFrame(totalData)
 
+df = shuffle(totalData)
+
+print(totalData.head)
+testData= df.iloc[int(len(df)*0.85):, :] #15%
+validData = df.iloc[int(len(df)*0.7):int(len(df)*0.85), :]#15%
+trainData = df.iloc[:int(len(df)*0.7), :]#70%
+
+
+
+
+print(testData.shape, validData.shape, trainData.shape)
+testData.to_csv("RawData/testData", header = None)
+validData.to_csv("RawData/validData", header = None)
+trainData.to_csv("RawData/trainData", header = None)
