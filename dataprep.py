@@ -10,7 +10,16 @@ import torchvision.transforms as transforms
 import pandas as pd
 import csv
 
+totalData = []
+
 with open('RawData/sms+spam+collection/SMSSpamCollection', newline = '') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+    spamreader = csv.reader(csvfile, quotechar='|')
     for row in spamreader:
-        print(', '.join(row))
+        #print(', '.join(row))
+        totalData.append(row[0])
+#print(totalData)
+labels = []
+values = []
+for row in totalData:
+    labels.append(row.split()[0]) 
+
