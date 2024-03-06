@@ -8,4 +8,9 @@ import torchvision
 from torch.utils.data.sampler import SubsetRandomSampler
 import torchvision.transforms as transforms
 import pandas as pd
+import csv
 
+with open('RawData/sms+spam+collection/SMSSpamCollection', newline = '') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+    for row in spamreader:
+        print(', '.join(row))
