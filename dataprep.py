@@ -21,5 +21,17 @@ with open('RawData/sms+spam+collection/SMSSpamCollection', newline = '') as csvf
 labels = []
 values = []
 for row in totalData:
-    labels.append(row.split()[0]) 
+    try:
+        row.split()[1]
+        labels.append(row.split()[0]) 
+        values.append(" ".join(row.split()[1:]))
+    except:
+        print("opp got em chief")
+        
+print(len(values), len(labels))
+
+totalData = list(zip(labels, values))
+
+print(totalData[:10])
+
 
