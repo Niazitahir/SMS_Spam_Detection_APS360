@@ -13,7 +13,7 @@ import torchvision.transforms as transforms
 class lstmNet(nn.Module):
     def __init__(self):
         self.name = "large"
-
+        self.lstm1 = nn.LSTM()
     def forward(self, x):
 
         return x
