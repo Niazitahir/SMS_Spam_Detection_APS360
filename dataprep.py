@@ -16,7 +16,9 @@ nltk.download('stopwords')
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-
+#python3 -m pip install autocorrect
+from autocorrect import Speller
+spell = Speller()
 '''NOTES:
 THIS SCRIPT RANDOMELY SPLITS THE DATASET INTO 70% TRAINING,
 15% Valid, 15% Test
@@ -29,6 +31,10 @@ the dataframes.
 
 Have fun, boys. 
 '''
+
+
+#remove ham examples to increase spam percentage or increase spam
+#fuck with spam examples to mess (i.e grayscale, scaling)
 
 wnl = WordNetLemmatizer()
 stopW = set(stopwords.words('english'))
@@ -48,8 +54,8 @@ for row in totalData:
         #ans = " ".join(row.split()[1:]) #lower casing text and lemmatize
         ans = row.split()[1:]
         #word_tokens = word_tokenize(ans)
-        filtered_ans = [wnl.lemmatize(w) for w in ans if not w.lower() in stopW]
-        filtered_ans = " ".join(filtered_ans)
+        filtered_ans = [w.lower() for w in ans if not w.lower() in stopW]
+        filtered_ans = spell(" ".join(filtered_ans))
         values.append(filtered_ans)
     except:
         print("opp got em chief") #do not add data without a label/value match. some only have a label
@@ -71,4 +77,6 @@ print(testData.shape, validData.shape, trainData.shape)
 testData.to_csv("RawData/testData", header = None)
 validData.to_csv("RawData/validData", header = None)
 trainData.to_csv("RawData/trainData", header = None)
+
+#wor2vec implementation, save  vectors to file 
 
