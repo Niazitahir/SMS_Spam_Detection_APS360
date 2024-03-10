@@ -11,7 +11,7 @@ import pandas as pd
 import csv
 from sklearn.utils import shuffle
 import nltk
-nltk.download('wordnet')
+#nltk.download('wordnet')
 nltk.download('stopwords')
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -36,10 +36,10 @@ Have fun, boys.
 #remove ham examples to increase spam percentage or increase spam
 #fuck with spam examples to mess (i.e grayscale, scaling)
 
-wnl = WordNetLemmatizer()
-stopW = set(stopwords.words('english'))
-totalData = []
+
 def textPrep():
+    stopW = set(stopwords.words('english'))
+    totalData = []
     with open('RawData/sms+spam+collection/SMSSpamCollection', newline = '') as csvfile:
         spamreader = csv.reader(csvfile, quotechar='|')
         for row in spamreader:
@@ -89,10 +89,56 @@ def w2VecPreparation():
     # Make a dictionary
     we_dict = {word:model.wv[word] for word in words}
     print(we_dict)
+def adaPrep():
+    from transformers import GPT2TokenizerFast
+    totalData = []
+    tokenizer = GPT2TokenizerFast.from_pretrained('Xenova/text-embedding-ada-002')
+    assert tokenizer.encode('hello world') == [15339, 1917]
+    
+    with open("RawData/trainData", encoding="utf8") as csvfile:
+        spamreader = csv.reader(csvfile, quotechar='|')
+        for row in spamreader:
+            totalData.append(row)
 
+    values = []
+    labels  = []
+    for i in range(len(totalData)):
+        labels.append( tokenizer.encode(totalData[i][1]))
+        values.append(tokenizer.encode(totalData[i][2]))
+    totalData = list(zip(labels, values))
+    totalData = pd.DataFrame(totalData).to_csv("RawData/trainEncoded", header=False)
+    totalData = []
+    with open("RawData/testData", encoding="utf8") as csvfile:
+        spamreader = csv.reader(csvfile, quotechar='|')
+        for row in spamreader:
+            totalData.append(row)
+
+    values = []
+    labels  = []
+    for i in range(len(totalData)):
+        labels.append( tokenizer.encode(totalData[i][1]))
+        values.append(tokenizer.encode(totalData[i][2]))
+    totalData = list(zip(labels, values))
+    totalData = pd.DataFrame(totalData).to_csv("RawData/testEncoded", header=False)
+    totalData = []
+    with open("RawData/validData", encoding="utf8") as csvfile:
+        spamreader = csv.reader(csvfile, quotechar='|')
+        for row in spamreader:
+            totalData.append(row)
+
+    values = []
+    labels  = []
+    for i in range(len(totalData)):
+        labels.append( tokenizer.encode(totalData[i][1]))
+        values.append(tokenizer.encode(totalData[i][2]))
+    totalData = list(zip(labels, values))
+    totalData = pd.DataFrame(totalData).to_csv("RawData/validEncoded", header=False)
+        
+def cosine_similarity(a, b):
+    return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 if __name__ == "__main__":
-    textPrep()
-    w2VecPreparation()
+    #textPrep()
+    adaPrep()
     
 #wor2vec implementation, save  vectors to file 
 
