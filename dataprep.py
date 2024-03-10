@@ -39,44 +39,60 @@ Have fun, boys.
 wnl = WordNetLemmatizer()
 stopW = set(stopwords.words('english'))
 totalData = []
+def textPrep():
+    with open('RawData/sms+spam+collection/SMSSpamCollection', newline = '') as csvfile:
+        spamreader = csv.reader(csvfile, quotechar='|')
+        for row in spamreader:
+            totalData.append(row[0])
+            
+    labels = []
+    values = []
+    for row in totalData:
+        try:
+            row.split()[1]
+            labels.append(row.split()[0]) 
+            #ans = " ".join(row.split()[1:]) #lower casing text and lemmatize
+            ans = row.split()[1:]
+            #word_tokens = word_tokenize(ans)
+            filtered_ans = [w.lower() for w in ans if not w.lower() in stopW]
+            filtered_ans = spell(" ".join(filtered_ans))
+            values.append(filtered_ans)
+        except:
+            print("opp got em chief") #do not add data without a label/value match. some only have a label
+            
+    print(len(values), len(labels))
+    totalData = list(zip(labels, values))
+    print(totalData[:10])
 
-with open('RawData/sms+spam+collection/SMSSpamCollection', newline = '') as csvfile:
-    spamreader = csv.reader(csvfile, quotechar='|')
-    for row in spamreader:
-        totalData.append(row[0])
-        
-labels = []
-values = []
-for row in totalData:
-    try:
-        row.split()[1]
-        labels.append(row.split()[0]) 
-        #ans = " ".join(row.split()[1:]) #lower casing text and lemmatize
-        ans = row.split()[1:]
-        #word_tokens = word_tokenize(ans)
-        filtered_ans = [w.lower() for w in ans if not w.lower() in stopW]
-        filtered_ans = spell(" ".join(filtered_ans))
-        values.append(filtered_ans)
-    except:
-        print("opp got em chief") #do not add data without a label/value match. some only have a label
-        
-print(len(values), len(labels))
-totalData = list(zip(labels, values))
-print(totalData[:10])
+    totalData = pd.DataFrame(totalData)
 
-totalData = pd.DataFrame(totalData)
+    df = shuffle(totalData)
 
-df = shuffle(totalData)
+    print(totalData.head)
+    testData= df.iloc[int(len(df)*0.85):, :] #15%
+    validData = df.iloc[int(len(df)*0.7):int(len(df)*0.85), :]#15%
+    trainData = df.iloc[:int(len(df)*0.7), :]#70%
 
-print(totalData.head)
-testData= df.iloc[int(len(df)*0.85):, :] #15%
-validData = df.iloc[int(len(df)*0.7):int(len(df)*0.85), :]#15%
-trainData = df.iloc[:int(len(df)*0.7), :]#70%
+    print(testData.shape, validData.shape, trainData.shape)
+    testData.to_csv("RawData/testData", header = None)
+    validData.to_csv("RawData/validData", header = None)
+    trainData.to_csv("RawData/trainData", header = None)
 
-print(testData.shape, validData.shape, trainData.shape)
-testData.to_csv("RawData/testData", header = None)
-validData.to_csv("RawData/validData", header = None)
-trainData.to_csv("RawData/trainData", header = None)
+def w2VecPreparation():
+    import gensim
+    import logging
+    sentences = gensim.models.word2vec.LineSentence(open('RawData/trainData',encoding="utf8"), max_sentence_length=10000)
+    model = gensim.models.Word2Vec(sentences, window=15, min_count=3, workers=4) #https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-sen.2018.5046
+    model.save("RawData/train.w2v")
+    # Get the ordered list of words in the vocabulary
+    words = list(w for w in model.wv.index_to_key)
+    # Make a dictionary
+    we_dict = {word:model.wv[word] for word in words}
+    print(we_dict)
 
+if __name__ == "__main__":
+    textPrep()
+    w2VecPreparation()
+    
 #wor2vec implementation, save  vectors to file 
 
